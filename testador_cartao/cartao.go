@@ -3,38 +3,49 @@ package main
 import "fmt"
 
 type Card struct {
-	tries       int
-	isBlocked   bool
-	isInserted  bool
-	password    string
+	tries      int
+	isBlocked  bool
+	maxTries   int
+	password   string
 }
 
-func (card *Card) insertCard() {
-	card.isInserted = true
-}
+func (card *Card) verifyTriesLimit() bool {
+	maxTries := 3
 
-func (card *Card) verifyIfCardIsInserted() {
-	if !card.isInserted {
-		fmt.Println("Insira o cartão antes de digitar a senha!")
-		return
-	}
-}
+	remainingAttempts := maxTries - card.tries
 
-func (card *Card) verifyTriesLimit() {
 	if card.tries > 2 {
 		card.isBlocked = true
 		fmt.Println("Você está bloqueado de tentar efetuar tentativas!")
+		return true
 	}
+
+	fmt.Printf("Você ainda tem: %d tentativas.\n", remainingAttempts)
+
+	return false
 }
 
 func (card *Card) verifyPasswordInput(tentativa string) {
 	if tentativa != card.password {
 		card.tries += 1
-		fmt.Println("Senha incorreta! \nDigite novamente.")
+		fmt.Println("\nSenha incorreta! \nDigite novamente.")
 		return
 	}
 
 	fmt.Println("Senha confirmada!")
+}
+
+func start(card *Card) {
+	for true {
+		passwordTrie := ""
+		fmt.Println("Insira a senha do seu cartão de crédito:")
+		fmt.Scanln(&passwordTrie)
+		
+		card.verifyPasswordInput(passwordTrie)
+		if card.verifyTriesLimit() {
+			break
+		}
+	}
 }
 
 func main() {
@@ -42,12 +53,5 @@ func main() {
 		password: "picos18",
 	}
 
-	card.verifyIfCardIsInserted()
-	card.insertCard()
-	card.verifyTriesLimit()
-	card.verifyPasswordInput("senha")
-	card.verifyTriesLimit()
-	card.verifyPasswordInput("senha")
-	card.verifyTriesLimit()
-	card.verifyPasswordInput("picos18")
+	start(&card)
 }
