@@ -10,38 +10,39 @@ type Card struct {
 }
 
 func (card *Card) verifyTriesLimit() bool {
-	maxTries := 3
+	remainingAttempts := card.maxTries - card.tries
 
-	remainingAttempts := maxTries - card.tries
-
-	if card.tries > 2 {
+	if remainingAttempts <= 0 {
 		card.isBlocked = true
 		fmt.Println("Você está bloqueado de tentar efetuar tentativas!")
 		return true
 	}
 
-	fmt.Printf("Você ainda tem: %d tentativas.\n", remainingAttempts)
-
+	fmt.Printf("Você ainda tem %d tentativas.\n", remainingAttempts)
 	return false
 }
 
-func (card *Card) verifyPasswordInput(tentativa string) {
+func (card *Card) verifyPasswordInput(tentativa string) bool {
 	if tentativa != card.password {
-		card.tries += 1
-		fmt.Println("\nSenha incorreta! \nDigite novamente.")
-		return
+		card.tries++
+		fmt.Println("\nSenha incorreta! Digite novamente.")
+		return false
 	}
 
 	fmt.Println("Senha confirmada!")
+	return true
 }
 
 func start(card *Card) {
-	for true {
-		passwordTrie := ""
+	for !card.isBlocked {
+		var passwordInput string
 		fmt.Println("Insira a senha do seu cartão de crédito:")
-		fmt.Scanln(&passwordTrie)
-		
-		card.verifyPasswordInput(passwordTrie)
+		fmt.Scanln(&passwordInput)
+
+		if card.verifyPasswordInput(passwordInput) {
+			break
+		}
+
 		if card.verifyTriesLimit() {
 			break
 		}
@@ -51,6 +52,7 @@ func start(card *Card) {
 func main() {
 	card := Card{
 		password: "picos18",
+		maxTries: 3,
 	}
 
 	start(&card)
